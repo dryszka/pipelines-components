@@ -34,8 +34,8 @@ def documents_rag_optimization_pipeline(
     test_data_key: str,
     input_data_secret_name: str,
     input_data_bucket_name: str,
-    input_data_key: str,
     llama_stack_secret_name: str,
+    input_data_key: str = "",
     embeddings_models: Optional[List] = None,
     generation_models: Optional[List] = None,
     optimization_metric: str = "faithfulness",
@@ -64,9 +64,9 @@ def documents_rag_optimization_pipeline(
             for input document data access. The following environment variables are required:
             AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_ENDPOINT, AWS_DEFAULT_REGION.
         input_data_bucket_name: S3 (or compatible) bucket name for the input documents.
-        input_data_key: Object key (path) of the input documents in the input data bucket.
         llama_stack_secret_name: Name of the Kubernetes secret for llama-stack API connection.
             The secret must define: LLAMA_STACK_CLIENT_API_KEY, LLAMA_STACK_CLIENT_BASE_URL.
+        input_data_key: Object key (path) of the input documents in the input data bucket.
         embeddings_models: Optional list of embedding model identifiers to use in the search space.
         generation_models: Optional list of foundation/generation model identifiers to use in the
             search space.
@@ -81,6 +81,7 @@ def documents_rag_optimization_pipeline(
         test_data_bucket_name=test_data_bucket_name,
         test_data_path=test_data_key,
     )
+
     test_data_loader_task.set_caching_options(False)
     test_data_loader_task.set_cpu_request("2").set_memory_request("8Gi")
 
@@ -89,12 +90,14 @@ def documents_rag_optimization_pipeline(
         input_data_path=input_data_key,
         test_data=test_data_loader_task.outputs["test_data"],
     )
+
     documents_discovery_task.set_caching_options(False)
     documents_discovery_task.set_cpu_request("2").set_memory_request("8Gi")
 
     text_extraction_task = text_extraction(
         documents_descriptor=documents_discovery_task.outputs["discovered_documents"],
     )
+
     text_extraction_task.set_caching_options(False)
     text_extraction_task.set_cpu_request("2").set_memory_request("8Gi")
 
@@ -119,6 +122,7 @@ def documents_rag_optimization_pipeline(
         embeddings_models=embeddings_models,
         generation_models=generation_models,
     )
+
     mps_task.set_caching_options(False)
     mps_task.set_cpu_request("2").set_memory_request("8Gi")
 
@@ -134,8 +138,10 @@ def documents_rag_optimization_pipeline(
         test_data_key=test_data_key,
         input_data_key=input_data_key,
     )
+
     hpo_task.set_caching_options(False)
     hpo_task.set_cpu_request("2").set_memory_request("8Gi")
+
 
     use_secret_as_env(
         mps_task,
