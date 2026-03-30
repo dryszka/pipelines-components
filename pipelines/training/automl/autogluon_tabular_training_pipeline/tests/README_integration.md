@@ -18,19 +18,21 @@ Set these to enable the AutoML integration tests; otherwise they are skipped. Yo
 | `RHOAI_URL` | Yes | Base URL of the OCP cluster (e.g. `https://api.example.com`). |
 | `RHOAI_KFP_URL` | No | KFP server URL where the client connects. Omit when using `RHOAI_CREATE_DSPA=true` (the route URL is resolved automatically). |
 | `RHOAI_TOKEN` | Yes | API token; use a **service account token** for Jenkins/CI (long-lived, no oc or kubeconfig). |
-| `RHOAI_PROJECT_NAME` | No | RHOAI Project/namespace name for the test run (default: `kfp-integration-test`). |
+| `RHOAI_PROJECT_NAME` | Yes | RHOAI Project/namespace name for the test run. |
 | `AWS_S3_ENDPOINT` | Yes | S3-compatible endpoint URL. |
 | `AWS_ACCESS_KEY_ID` | Yes | S3 access key. |
 | `AWS_SECRET_ACCESS_KEY` | Yes | S3 secret key. |
-| `AWS_DEFAULT_REGION` | No | S3 region (default: `us-east-1`). |
+| `AWS_DEFAULT_REGION` | Yes | S3 region. |
+| `AWS_S3_INTERNAL_ENDPOINT` | No | Optional internal S3 URL (e.g. cluster-local); omit if unused. |
 | `RHOAI_TEST_DATA_BUCKET` | Yes | Bucket used for test data upload and pipeline input. |
-| `RHOAI_TEST_ARTIFACTS_BUCKET` | No | Bucket where pipeline artifacts are written (default: same as data bucket). |
-| `RHOAI_TEST_S3_SECRET_NAME` | No | Name of the Kubernetes secret holding S3 credentials in the project (default: `s3-connection`). |
+| `RHOAI_TEST_ARTIFACTS_BUCKET` | Yes | Bucket where pipeline artifacts are written. |
+| `RHOAI_TEST_S3_SECRET_NAME` | Yes | Name of the Kubernetes secret holding S3 credentials in the project. |
+| `STRICT` | No | If `true`/`1`/`yes`, missing required variables raise at import with a list of missing names (instead of skipping tests). |
 | `RHOAI_PIPELINE_RUN_TIMEOUT` | No | Timeout in seconds for waiting on a run (default: `3600`). |
 | `RHOAI_TEST_CONFIG_TAGS` | No | Comma-separated tags; if set, only test configs with at least one of these tags run (e.g. `smoke`, `regression`). See [Filtering by tags](#filtering-by-tags). |
 | `RHOAI_CREATE_DSPA` | No | Set to `true` or `1` to have the tests create a DataSciencePipelinesApplication CR; the operator deploys the pipeline server. See [Creating a DataSciencePipelinesApplication CR](#creating-a-datasciencepipelinesapplication-cr-dspa). |
 
-All required variables must be set for the AutoML integration tests to run; if any is missing, `RHOAI_INTEGRATION_CONFIG` is `None` and the tests are skipped with a reason pointing to `.env.template`.
+All required variables must be set for the AutoML integration tests to run; if any is missing, `RHOAI_INTEGRATION_CONFIG` is `None` and the tests are skipped with `RHOAI_INTEGRATION_SKIP_REASON` listing missing names (unless `STRICT` is set, in which case import fails with the same list).
 
 ### Authentication (service account token for Jenkins / CI)
 
