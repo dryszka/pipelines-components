@@ -4,6 +4,7 @@ from kfp import dsl
 
 from kfp_components.utils.consts import AUTOML_IMAGE  # pyright: ignore[reportMissingImports]
 
+
 @dsl.component(
     base_image=AUTOML_IMAGE,  # noqa: E501
 )

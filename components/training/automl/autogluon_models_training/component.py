@@ -7,6 +7,7 @@ from kfp_components.utils.consts import AUTOML_IMAGE  # pyright: ignore[reportMi
 # Reuse notebook templates from autogluon_models_full_refit
 _NOTEBOOKS_DIR = str(pathlib.Path(__file__).parent / "notebook_templates")
 
+
 @dsl.component(
     base_image=AUTOML_IMAGE,  # noqa: E501
     embedded_artifact_path=_NOTEBOOKS_DIR,

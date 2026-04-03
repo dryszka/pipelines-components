@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from kfp import dsl
 from kfp_components.utils.consts import AUTORAG_IMAGE  # pyright: ignore[reportMissingImports]
 
+
 @dsl.component(
     base_image=AUTORAG_IMAGE,  # noqa: E501
 )

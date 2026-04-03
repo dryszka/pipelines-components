@@ -3,6 +3,7 @@ from typing import List, NamedTuple, Optional
 from kfp import dsl
 from kfp_components.utils.consts import AUTOML_IMAGE  # pyright: ignore[reportMissingImports]
 
+
 @dsl.component(
     base_image=AUTOML_IMAGE,  # noqa: E501
     packages_to_install=["autogluon.timeseries==1.5.0"],
