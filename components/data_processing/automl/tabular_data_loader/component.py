@@ -1,7 +1,6 @@
 from typing import NamedTuple, Optional
 
 from kfp import dsl
-
 from kfp_components.utils.consts import AUTOML_IMAGE  # pyright: ignore[reportMissingImports]
 
 
