@@ -1,6 +1,78 @@
+import logging
+import os
+import sys
+from pathlib import Path
 from typing import Optional
 
 from kfp import dsl
+
+
+def _docling_artifacts_path() -> Optional[Path]:
+    """Local Docling models root (contains docling-project--* dirs). Set via image ENV for offline use."""
+    raw = os.environ.get("DOCLING_ARTIFACTS_PATH")
+    return Path(raw) if raw else None
+
+
+def _build_docling_format_options():
+    """Shared pipeline options for main-process warmup and worker processes (spawn-safe: module-level)."""
+    from docling.datamodel.accelerator_options import AcceleratorOptions
+    from docling.datamodel.base_models import InputFormat
+    from docling.datamodel.pipeline_options import PaginatedPipelineOptions, ThreadedPdfPipelineOptions
+    from docling.document_converter import (
+        HTMLFormatOption,
+        MarkdownFormatOption,
+        PdfFormatOption,
+        PowerpointFormatOption,
+        WordFormatOption,
+    )
+
+    ap = _docling_artifacts_path()
+    pdf_pipeline_options = ThreadedPdfPipelineOptions(
+        artifacts_path=ap,
+        do_ocr=False,
+        do_table_structure=False,
+        accelerator_options=AcceleratorOptions(device="cpu", num_threads=2),
+    )
+    paginated_pipeline_options = PaginatedPipelineOptions(
+        artifacts_path=ap,
+        generate_page_images=False,
+        accelerator_options=AcceleratorOptions(device="cpu", num_threads=2),
+    )
+    return {
+        InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_pipeline_options),
+        InputFormat.DOCX: WordFormatOption(pipeline_options=paginated_pipeline_options),
+        InputFormat.PPTX: PowerpointFormatOption(pipeline_options=paginated_pipeline_options),
+        InputFormat.HTML: HTMLFormatOption(),
+        InputFormat.MD: MarkdownFormatOption(),
+    }
+
+
+def _text_extraction_pool_initializer() -> None:
+    """Pool initializer (top-level for multiprocessing spawn pickling)."""
+    import time
+
+    os.environ["TQDM_DISABLE"] = "1"
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
+    from docling.document_converter import DocumentConverter
+
+    worker_log = logging.getLogger("text_extraction_worker")
+    worker_log.setLevel(logging.INFO)
+    worker_log.propagate = False
+    if not worker_log.handlers:
+        worker_log.addHandler(logging.StreamHandler(sys.stdout))
+
+    worker_pid = os.getpid()
+    init_start_time = time.perf_counter()
+    worker_log.debug("Worker pid=%s: loading DocumentConverter.", worker_pid)
+
+    mod = sys.modules[__name__]
+    mod._mp_worker_converter = DocumentConverter(format_options=_build_docling_format_options())
+    worker_log.debug(
+        "Worker pid=%s: DocumentConverter ready (%.1fs)",
+        worker_pid,
+        time.perf_counter() - init_start_time,
+    )
 
 
 @dsl.component(
@@ -119,69 +191,12 @@ def text_extraction(
         logger.info("Download finished %s (%.1fs)", key, time.perf_counter() - _dl_t0)
         return local_path
 
-    def worker_initializer() -> None:
-        """Initialize a worker process by loading docling's DocumentConverter.
-
-        Called once per worker process when the multiprocessing Pool starts.
-        Stores the converter as a module-level attribute (_mp_worker_converter)
-        so that worker_process_document can retrieve it without re-importing
-        docling on every call. Docling imports are intentionally deferred to
-        this function to avoid loading heavy native libraries in the main process
-        and to prevent fork-safety issues with ONNX Runtime internals.
-        """
-        os.environ["TQDM_DISABLE"] = "1"
-        os.environ.setdefault("HF_HUB_OFFLINE", "1")
-
-        from docling.datamodel.accelerator_options import AcceleratorOptions
-        from docling.datamodel.base_models import InputFormat
-        from docling.datamodel.pipeline_options import PaginatedPipelineOptions, PdfPipelineOptions
-        from docling.document_converter import (
-            DocumentConverter,
-            HTMLFormatOption,
-            MarkdownFormatOption,
-            PdfFormatOption,
-            PowerpointFormatOption,
-            WordFormatOption,
-        )
-
-        worker_log = logging.getLogger("text_extraction_worker")
-        worker_log.setLevel(logging.INFO)
-        worker_log.propagate = False
-        if not worker_log.handlers:
-            worker_log.addHandler(logging.StreamHandler(sys.stdout))
-
-        worker_pid = os.getpid()
-        init_start_time = time.perf_counter()
-        worker_log.debug("Worker pid=%s: loading DocumentConverter.", worker_pid)
-
-        pdf_pipeline_options = PdfPipelineOptions()
-        pdf_pipeline_options.do_ocr = False
-        pdf_pipeline_options.do_table_structure = False
-        pdf_pipeline_options.accelerator_options = AcceleratorOptions(device="cpu", num_threads=2)
-
-        paginated_pipeline_options = PaginatedPipelineOptions()
-        paginated_pipeline_options.generate_page_images = False
-        paginated_pipeline_options.accelerator_options = AcceleratorOptions(device="cpu", num_threads=2)
-
-        sys.modules[__name__]._mp_worker_converter = DocumentConverter(
-            format_options={
-                InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_pipeline_options),
-                InputFormat.DOCX: WordFormatOption(pipeline_options=paginated_pipeline_options),
-                InputFormat.PPTX: PowerpointFormatOption(pipeline_options=paginated_pipeline_options),
-                InputFormat.HTML: HTMLFormatOption(),
-                InputFormat.MD: MarkdownFormatOption(),
-            }
-        )
-        worker_log.debug(
-            "Worker pid=%s: DocumentConverter ready (%.1fs)", worker_pid, time.perf_counter() - init_start_time
-        )
-
     def worker_process_document(file_path_str: str, output_dir_str: str) -> tuple[bool, str | None]:
         """Convert a single document to Markdown and write it to the output directory.
 
         Plain-text (.txt) files are copied as-is without invoking docling.
         All other supported formats are converted via the DocumentConverter
-        that was created by worker_initializer() in this process.
+        that was created by the multiprocessing pool initializer in this process.
 
         Args:
             file_path_str: Absolute path to the local input file.
@@ -207,7 +222,7 @@ def text_extraction(
             if converter is None:
                 error_message = (
                     f"Worker pid={os.getpid()} has no DocumentConverter. "
-                    "worker_initializer() did not run or failed before setting _mp_worker_converter. "
+                    "Pool initializer did not run or failed before setting _mp_worker_converter. "
                 )
                 return False, error_message
 
@@ -340,16 +355,22 @@ def text_extraction(
         DOWNLOAD_MAX_THREADS,
     )
 
+    if _docling_artifacts_path() is not None:
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
     logger.info("Pre-downloading docling models in main process...")
     from docling.document_converter import DocumentConverter
 
-    DocumentConverter()
+    DocumentConverter(format_options=_build_docling_format_options())
     logger.info("Docling models ready.")
 
     multiprocessing_context = multiprocessing.get_context("spawn")
     with (
         tempfile.TemporaryDirectory() as download_dir,
-        multiprocessing_context.Pool(processes=effective_workers, initializer=worker_initializer) as process_pool,
+        multiprocessing_context.Pool(
+            processes=effective_workers,
+            initializer=_text_extraction_pool_initializer,
+        ) as process_pool,
     ):
         download_start_time = time.perf_counter()
         extraction_tasks, download_error_details = download_and_submit(
