@@ -15,8 +15,6 @@ COPY pipelines/training/autorag/documents_rag_optimization_pipeline/seed_docling
 
 # Build SQLite from sqlite-autoconf (Hermeto generic prefetch or download); replace system libsqlite3.
 # https://github.com/hermetoproject/hermeto/blob/main/docs/generic.md
-RUN ls /cachi2/output/deps/
-
 ARG HERMETO_GENERIC_DEPS=/cachi2/output/deps/generic
 
 # Build SQLite from sqlite-autoconf (Hermeto generic prefetch or download); replace system libsqlite3.
