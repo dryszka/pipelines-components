@@ -1,8 +1,8 @@
 # This container is used to run the AutoRAG components of the training pipeline.
 
 #ARG BASE_IMAGE="quay.io/aipcc/base-images/cpu:3.3"
-ARG BASE_IMAGE="registry.redhat.io/rhai/base-image-cpu-rhel9@sha256:118425714f88c5b24cd67e828e0bcc7a9bc634ab2a1448e8f0975dfd85aea45c"
-
+#ARG BASE_IMAGE="registry.redhat.io/rhai/base-image-cpu-rhel9@sha256:118425714f88c5b24cd67e828e0bcc7a9bc634ab2a1448e8f0975dfd85aea45c"
+ARG BASE_IMAGE"=registry.redhat.io/ubi9/python-312:9.7"
 FROM ${BASE_IMAGE}
 
 COPY pipelines/training/autorag/documents_rag_optimization_pipeline/requirements.txt \
@@ -17,12 +17,12 @@ COPY pipelines/training/autorag/documents_rag_optimization_pipeline/seed_docling
 # Build SQLite from sqlite-autoconf (Hermeto generic prefetch or download); replace system libsqlite3.
 # https://github.com/hermetoproject/hermeto/blob/main/docs/generic.md
 RUN ls /cachi2/output/deps/
+
 ARG HERMETO_GENERIC_DEPS=/cachi2/output/deps/generic
 
-# Invoke with bash (no chmod: Cachi2/hermetic builds may forbid chmod on COPY'd files under /tmp).
+# Build SQLite from sqlite-autoconf (Hermeto generic prefetch or download); replace system libsqlite3.
 USER root
 RUN HERMETO_GENERIC_DEPS="${HERMETO_GENERIC_DEPS}" bash /tmp/install_sqlite_from_source.sh
-
 USER default
 
 ## TODO: Ensure build isolation
