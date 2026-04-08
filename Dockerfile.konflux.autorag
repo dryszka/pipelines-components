@@ -16,9 +16,14 @@ COPY pipelines/training/autorag/documents_rag_optimization_pipeline/seed_docling
 
 # Build SQLite from sqlite-autoconf (Hermeto generic prefetch or download); replace system libsqlite3.
 # https://github.com/hermetoproject/hermeto/blob/main/docs/generic.md
+RUN ls /cachi2/output/deps/
 ARG HERMETO_GENERIC_DEPS=/cachi2/output/deps/generic
+
 # Invoke with bash (no chmod: Cachi2/hermetic builds may forbid chmod on COPY'd files under /tmp).
+USER root
 RUN HERMETO_GENERIC_DEPS="${HERMETO_GENERIC_DEPS}" bash /tmp/install_sqlite_from_source.sh
+
+USER default
 
 ## TODO: Ensure build isolation
 RUN pip install --index-url https://console.redhat.com/api/pypi/public-rhai/rhoai/3.4/cpu-ubi9/simple/ --no-cache-dir -r /tmp/requirements.txt

@@ -16,19 +16,6 @@ readonly SQLITE_YEAR="2026"
 readonly DOWNLOAD_URL="https://sqlite.org/${SQLITE_YEAR}/${TARBALL_NAME}"
 readonly BUILD_ROOT="/tmp/sqlite-build-${SQLITE_DIR_NAME}"
 
-install_os_build_deps() {
-  if command -v microdnf >/dev/null 2>&1; then
-    microdnf -y install gcc make tar gzip findutils curl && microdnf clean all
-  elif command -v dnf >/dev/null 2>&1; then
-    dnf -y install gcc make tar gzip findutils curl && dnf clean all
-  elif command -v apt-get >/dev/null 2>&1; then
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update -y && apt-get install -y gcc make tar gzip findutils curl && rm -rf /var/lib/apt/lists/*
-  else
-    echo "install_sqlite_from_source.sh: error: need microdnf, dnf, or apt-get to install build tools" >&2
-    return 1
-  fi
-}
 
 resolve_system_sqlite_libdir() {
   local f
@@ -91,7 +78,7 @@ find_built_libdir() {
 }
 
 main() {
-  install_os_build_deps
+
 
   local work_tar="/tmp/${TARBALL_NAME}"
   fetch_tarball_to "${work_tar}"
@@ -101,7 +88,9 @@ main() {
   tar -xzf "${work_tar}" -C "${BUILD_ROOT}"
   cd "${BUILD_ROOT}/${SQLITE_DIR_NAME}"
 
-  ./configure && make
+  ./configure --prefix=/usr/local --enable-shared --disable-static
+  make -j"$(nproc)"
+  make install
 
   local system_libdir built_libdir
   system_libdir="$(resolve_system_sqlite_libdir)"
@@ -117,9 +106,8 @@ main() {
     cp -a "${f}" /opt/.sqlite-system-backup/
   done
   cp -a "${built_libdir}"/libsqlite3.so* "${system_libdir}/"
-  if command -v ldconfig >/dev/null 2>&1; then
-    ldconfig
-  fi
+  ln -sf "${system_libdir}/libsqlite3.so.3.51.3" "${system_libdir}/libsqlite3.so"
+  ln -sf "${system_libdir}/libsqlite3.so.3.51.3" "${system_libdir}/libsqlite3.so.0"
 
   rm -rf "${BUILD_ROOT}" "${work_tar}"
   cd /
