@@ -6,6 +6,7 @@ FROM ${BASE_IMAGE}
 
 COPY pipelines/training/autorag/documents_rag_optimization_pipeline/requirements.txt \
      pipelines/training/autorag/documents_rag_optimization_pipeline/requirements-pypi.txt \
+     pipelines/training/autorag/documents_rag_optimization_pipeline/requirements-pypi-whl.txt \
      /tmp/
 
 COPY pipelines/training/autorag/documents_rag_optimization_pipeline/seed_docling_models.py \
