@@ -244,8 +244,14 @@ def automl_data_loader(  # noqa: D417
                 )
             logger.info("Performing sampling: method=%s", sampling_method)
 
-        def get_s3_client(verify=True):
-            """Create and return an S3 client using credentials from environment variables."""
+        s3_ca_bundle = os.environ.get("AWS_CA_BUNDLE", "").strip() or None
+
+        def get_s3_client():
+            """Create and return an S3 client using credentials from environment variables.
+
+            TLS certificate verification is always enabled: the client uses the PEM CA
+            bundle from ``AWS_CA_BUNDLE`` when set and the system trust bundle otherwise.
+            """
             credentials = resolve_s3_env_credentials()
             validate_s3_env_credentials(credentials)
 
@@ -255,7 +261,7 @@ def automl_data_loader(  # noqa: D417
                 region_name=credentials["region_name"],
                 aws_access_key_id=credentials["access_key"],
                 aws_secret_access_key=credentials["secret_key"],
-                verify=verify,
+                verify=s3_ca_bundle or True,
             )
 
         def _sample_first_n_rows(
@@ -530,13 +536,15 @@ def automl_data_loader(  # noqa: D417
             transfer_started = time.monotonic()
             try:
                 response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-            except SSLError:
-                logger.warning(
-                    "SSL error when downloading s3://%s/%s, retrying with verify=False",
-                    bucket_name,
-                    file_key,
-                )
-                response = get_s3_client(verify=False).get_object(Bucket=bucket_name, Key=file_key)
+            except SSLError as exc:
+                certificate_source = s3_ca_bundle or "the system trust bundle"
+                raise RuntimeError(
+                    "S3 TLS certificate validation failed when downloading "
+                    f"s3://{bucket_name}/{file_key}. Verify that the CA bundle in use "
+                    f"({certificate_source}) is a PEM CA bundle that trusts the S3 endpoint; "
+                    "set AWS_CA_BUNDLE to one that does. "
+                    "Do not disable certificate verification."
+                ) from exc
 
             if "source_bytes" not in io_metrics:
                 source_bytes = response.get("ContentLength")
