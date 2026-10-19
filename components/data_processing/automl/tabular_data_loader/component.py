@@ -22,6 +22,7 @@ def automl_data_loader(  # noqa: D417
     test_data_bucket_name: str = "",
     test_data_file_key: str = "",
     preset: str = "speed",
+    ssl_cert_path: Optional[str] = None,
 ) -> NamedTuple(
     "outputs",
     sample_config=dict,
@@ -86,6 +87,11 @@ def automl_data_loader(  # noqa: D417
             (default) samples up to 100 MiB; ``"balanced"`` samples up to 1 GiB; and
             ``"quality"`` samples up to 10 GiB. User-provided test datasets are capped at
             50 MiB, 100 MiB, and 1 GiB respectively.
+        ssl_cert_path: Optional path to a PEM-encoded CA bundle used to verify the S3
+            endpoint. The filename extension is not significant; ``.pem`` and ``.crt``
+            are both common. It overrides ``AWS_CA_BUNDLE`` for this component; when
+            neither is set, the system trust bundle is used. TLS verification is never
+            disabled.
 
     Raises:
         ValueError: If sampling_method, task_type, or preset is invalid, if required parameters are missing,
@@ -244,13 +250,14 @@ def automl_data_loader(  # noqa: D417
                 )
             logger.info("Performing sampling: method=%s", sampling_method)
 
-        s3_ca_bundle = os.environ.get("AWS_CA_BUNDLE", "").strip() or None
+        effective_ssl_cert_path = (ssl_cert_path or os.environ.get("AWS_CA_BUNDLE") or "").strip() or None
 
         def get_s3_client():
             """Create and return an S3 client using credentials from environment variables.
 
             TLS certificate verification is always enabled: the client uses the PEM CA
-            bundle from ``AWS_CA_BUNDLE`` when set and the system trust bundle otherwise.
+            bundle from ``ssl_cert_path`` or ``AWS_CA_BUNDLE`` when set and the system
+            trust bundle otherwise.
             """
             credentials = resolve_s3_env_credentials()
             validate_s3_env_credentials(credentials)
@@ -261,7 +268,7 @@ def automl_data_loader(  # noqa: D417
                 region_name=credentials["region_name"],
                 aws_access_key_id=credentials["access_key"],
                 aws_secret_access_key=credentials["secret_key"],
-                verify=s3_ca_bundle or True,
+                verify=effective_ssl_cert_path or True,
             )
 
         def _sample_first_n_rows(
@@ -537,12 +544,11 @@ def automl_data_loader(  # noqa: D417
             try:
                 response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
             except SSLError as exc:
-                certificate_source = s3_ca_bundle or "the system trust bundle"
+                certificate_source = effective_ssl_cert_path or "the system trust bundle"
                 raise RuntimeError(
                     "S3 TLS certificate validation failed when downloading "
-                    f"s3://{bucket_name}/{file_key}. Verify that the CA bundle in use "
-                    f"({certificate_source}) is a PEM CA bundle that trusts the S3 endpoint; "
-                    "set AWS_CA_BUNDLE to one that does. "
+                    f"s3://{bucket_name}/{file_key}. Verify that ssl_cert_path="
+                    f"{certificate_source!r} is a PEM CA bundle that trusts the S3 endpoint. "
                     "Do not disable certificate verification."
                 ) from exc
 
