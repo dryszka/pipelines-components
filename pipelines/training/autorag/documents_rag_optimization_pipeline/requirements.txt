@@ -37,7 +37,7 @@ kfp==2.15.2
 marko==2.2.2
 openai==2.23.0
 jiter==0.13.0
-pillow==13.0.0
+pillow==12.3.0
 pluggy==1.6.0
 pydantic==2.11.10
 pydantic_core==2.33.2
