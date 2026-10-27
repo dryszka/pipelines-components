@@ -160,4 +160,4 @@ Werkzeug==3.1.8
 window_ops==0.0.15
 wrapt==2.1.2
 xgboost==3.1.3
-yarl==1.23.0
+yarl==1.25.1
