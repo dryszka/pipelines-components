@@ -15,12 +15,14 @@ adagio==0.2.6 \
 aiohappyeyeballs==2.7.1 \
     --hash=sha256:148c42ea64254eff51702e3643744a5d29e19f1cc7f1adcfb2289d7ac711ae80
     # via aiohttp
-aiohttp==3.14.3 \
-    --hash=sha256:2b3edde0b0404f61d8a54d224824afe396e2315f6fb448063d0139e5c151e9e4 \
-    --hash=sha256:32c568a8f0b3d4f89f5ab9e355540627b00d48baf8116dde56e419661886b524 \
-    --hash=sha256:6301f6e7863cd0a7893c8cb629e1f1e9673bc5807e29f331b95499a359628113 \
-    --hash=sha256:c6ff96f50c667f18a9a7fcbb91449943658e37a04658acf44885d295ae2b158c
-    # via fsspec
+aiohttp==3.14.4 \
+    --hash=sha256:616d46938b694f83e92b99a70b5b70a24399af080acdb35e4e86ede599f57649 \
+    --hash=sha256:8b622b90579c8ec79118878eb59eb0ad4b27f35059e1b32bce4bd0a12192d06d \
+    --hash=sha256:969d26dd38892e4bca272fccb280d8d1c16046acb6fea3864760c8c2bd7e644c \
+    --hash=sha256:c3f27bb6facc93eb0466a38f3d89034896211b7c4ee306aeaa2b50da2062ba26
+    # via
+    #   -r requirements.in
+    #   fsspec
 aiosignal==1.4.0 \
     --hash=sha256:f67c1242810c1da35afc04f8fe6057d1f133fa581d32ecc4c841d08134436218
     # via aiohttp
@@ -235,9 +237,10 @@ fastprogress==1.1.6 \
 fasttransform==0.0.2 \
     --hash=sha256:84a8ea9d5e91f85b0e3d6f03f864dbdf02d6706c073a5034f7bf541e69e93e80
     # via fastai
-filelock==3.30.2 \
-    --hash=sha256:3876bce9fb39cd4dc9dc025336708416b2159bd96c5b4ca2d77dd14c9c7600ba
+filelock==4.2.4 \
+    --hash=sha256:3cddca5b5ab48b12258abe2ee146cb6c7bb36ccb2817ed369d358cf7088fe892
     # via
+    #   -r requirements.in
     #   huggingface-hub
     #   torch
 fonttools==4.63.0 \
@@ -610,16 +613,13 @@ peft==0.19.1 \
 pexpect==4.9.0 \
     --hash=sha256:76e4e42fc2b353ddb52526937278a06ebdd64b5a5cd55dc2b9a2b812f85d51fd
     # via ipython
-pillow==12.3.0 \
-    --hash=sha256:292ad662c4a21daa5c557816bd36870c036fcb32f1863a474725c9a48db317f2 \
-    --hash=sha256:4a904ef7f3765fc818c3a483529ff04147e97cc0390f9eec5edd30cae497fafe \
-    --hash=sha256:5762ef56cdceff2319ac80ed92150106a0bf51ec2eea15226f44c9d983e7b916 \
-    --hash=sha256:65a30ac6a91ac6d2d08c73441c8fe69653d0d818312b18d1dc86ee8932529cec \
-    --hash=sha256:787b6ebb6a267bca4040c40296487e0428b7ba8fe3024b2863626ba09d566fc9 \
-    --hash=sha256:bb4f92e67999c0820fd8a9f959f0dce3b0b0dcb8144d47aa7a1432183e7c4c98 \
-    --hash=sha256:c7d40c6deb9bf0b847d4f027d55e2362d55fbee8876dbf728af0e2efe345128a \
-    --hash=sha256:e803d1800d5fb6ed2fbbb8d1aa4a42f1f9080ed98b6f929646b920330031f6b1
+pillow==13.0.0 \
+    --hash=sha256:28998a83b7064f7b5418a9cbd83422007e36382424080d2d0d399c217fa77b0e \
+    --hash=sha256:2ee1aa6abaa9a76617aaabb5c9d2ad6cdb85ddb3b524a3d172cb86b08ffcf4c3 \
+    --hash=sha256:3f20989af8bc95245f8c138304d85f350ab191da661b9b42dc3ef8988833d059 \
+    --hash=sha256:823c9b5f18f00efb44008dac8ac24a869d50ff0f1d62bedb0e081ba058a8a23c
     # via
+    #   -r requirements.in
     #   fastai
     #   matplotlib
     #   tensorboard
@@ -1048,9 +1048,10 @@ typing-inspection==0.4.2 \
 tzdata==2026.3 \
     --hash=sha256:c785829cf72ef723f0788ee27618a0143532630f9e301ecc09f73990c7b212be
     # via pandas
-urllib3==2.7.0 \
-    --hash=sha256:8c0d942cee38135eb54435268fa34bceed0d0a7dff31d8aaee06c06ef8637942
+urllib3==2.8.0 \
+    --hash=sha256:cf189e13e706ae0f5465262fe46be26aeddd638328f239825c67496621c68627
     # via
+    #   -r requirements.in
     #   botocore
     #   kfp
     #   kfp-server-api
@@ -1116,15 +1117,11 @@ xgboost==3.1.3 \
     --hash=sha256:a6d655fae566d30ada1632a1ba56b5c34c5c4d1896ca1699d02d3edacdcf8a2f \
     --hash=sha256:d27b0d83a1c1b62a9e8b211fc7bb97b2cc3a7f65ad01bc001a47ceb8caeba705
     # via autogluon-tabular
-yarl==1.24.2 \
-    --hash=sha256:0c25026803293aa01955606c53270f4306b4196169570198a3a29b3a054f3d86 \
-    --hash=sha256:16ecb00a9b23f75686d3cdcd098105dd71f4e4ce21ffe13c181be7af349adc61 \
-    --hash=sha256:31f672aadd67c499c13777c60cce25b75f1c1f3c8006fed3b2fdcbb474ae410d \
-    --hash=sha256:3af19c86bfd747dd5324eda948c4e93c9fd57a47bf89f0fa9f51a019529b7081 \
-    --hash=sha256:b60a3ea96299c776f65c02e3714c4a34a608fdd95831d3861ee3ab0797eff0b0 \
-    --hash=sha256:c2cc773c104456911cfd309315909b4c0a90918d4883b2e9f025729a504a3e6e \
-    --hash=sha256:c72aabbf544bceb3fa895376a188a90b7152efd47045b589fd358505ad8a85d4 \
-    --hash=sha256:fcf4442656e2947f3a7e7d3cc85c8030a92570c133df0c9a3ab576a8be8e55fd
+yarl==1.25.1 \
+    --hash=sha256:04fdf42ffc9539ec940645b4de97860a3b38e652e483b7ff73b631e7c81e4dbf \
+    --hash=sha256:1277ed8f43cac8b13c6edfbe57098157ce972dbe02be281f84bcc12421fa493b \
+    --hash=sha256:2830640542a2d19bc21c8d247ff42d4400afc0494ef7030fb021c247c1d0f595 \
+    --hash=sha256:7f836cc5101cd02c46e0e7c7ac042bb12d798fd62639e253f2f9778a47df921d
     # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:

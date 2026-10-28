@@ -9,3 +9,12 @@ kfp==2.16.1
 kfp-kubernetes==2.16.1 # from kfp-components installed from this repo
 protobuf<6.32   # from kfp-components installed from this repo
 triton==3.6.0; platform_machine != 's390x'
+# Security pins for rhoai-3.5.4 CVE fixes (odh-automl-rhel9):
+# pillow 13.0.0 fixes CVE-2026-96640, -96643, -96644, -96778, -112390..-112393, -112397, -112399, -112400, -112402, -112404..-112406, -112892..-112897
+# aiohttp 3.14.4 fixes CVE-2026-111064, CVE-2026-111066
+# urllib3 2.8.0 fixes CVE-2026-97687, CVE-2026-97689
+# filelock 4.2.4 fixes CVE-2026-112940 (upstream fix is 4.2.1; 4.2.4 is the available index build)
+pillow==13.0.0
+aiohttp==3.14.4
+urllib3==2.8.0
+filelock==4.2.4
