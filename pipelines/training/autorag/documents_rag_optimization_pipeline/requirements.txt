@@ -11,12 +11,14 @@ ai4rag==0.10.4 \
 aiohappyeyeballs==2.7.1 \
     --hash=sha256:148c42ea64254eff51702e3643744a5d29e19f1cc7f1adcfb2289d7ac711ae80
     # via aiohttp
-aiohttp==3.14.3 \
-    --hash=sha256:2b3edde0b0404f61d8a54d224824afe396e2315f6fb448063d0139e5c151e9e4 \
-    --hash=sha256:32c568a8f0b3d4f89f5ab9e355540627b00d48baf8116dde56e419661886b524 \
-    --hash=sha256:6301f6e7863cd0a7893c8cb629e1f1e9673bc5807e29f331b95499a359628113 \
-    --hash=sha256:c6ff96f50c667f18a9a7fcbb91449943658e37a04658acf44885d295ae2b158c
-    # via fsspec
+aiohttp==3.14.4 \
+    --hash=sha256:616d46938b694f83e92b99a70b5b70a24399af080acdb35e4e86ede599f57649 \
+    --hash=sha256:8b622b90579c8ec79118878eb59eb0ad4b27f35059e1b32bce4bd0a12192d06d \
+    --hash=sha256:969d26dd38892e4bca272fccb280d8d1c16046acb6fea3864760c8c2bd7e644c \
+    --hash=sha256:c3f27bb6facc93eb0466a38f3d89034896211b7c4ee306aeaa2b50da2062ba26
+    # via
+    #   -r requirements.in
+    #   fsspec
 aiosignal==1.4.0 \
     --hash=sha256:f67c1242810c1da35afc04f8fe6057d1f133fa581d32ecc4c841d08134436218
     # via aiohttp
@@ -169,9 +171,10 @@ evaluate==0.4.6 \
 faker==40.31.0 \
     --hash=sha256:2045a96cbb764b050126da080b26ba6388c961a69569b8cdfa9d2cf534e681fd
     # via polyfactory
-filelock==3.30.2 \
-    --hash=sha256:3876bce9fb39cd4dc9dc025336708416b2159bd96c5b4ca2d77dd14c9c7600ba
+filelock==4.2.4 \
+    --hash=sha256:3cddca5b5ab48b12258abe2ee146cb6c7bb36ccb2817ed369d358cf7088fe892
     # via
+    #   -r requirements.in
     #   datasets
     #   huggingface-hub
     #   torch
@@ -976,9 +979,10 @@ tzdata==2026.3 \
 unitxt==1.26.10 \
     --hash=sha256:a36cc04a0d4a7926e9bdcf799737efa1e510190693005a804877e7f6310ab5e1
     # via ai4rag
-urllib3==2.7.0 \
-    --hash=sha256:8c0d942cee38135eb54435268fa34bceed0d0a7dff31d8aaee06c06ef8637942
+urllib3==2.8.0 \
+    --hash=sha256:cf189e13e706ae0f5465262fe46be26aeddd638328f239825c67496621c68627
     # via
+    #   -r requirements.in
     #   botocore
     #   kfp
     #   kfp-server-api
@@ -1034,15 +1038,11 @@ xxhash==3.8.1 \
     #   datasets
     #   evaluate
     #   langsmith
-yarl==1.24.2 \
-    --hash=sha256:0c25026803293aa01955606c53270f4306b4196169570198a3a29b3a054f3d86 \
-    --hash=sha256:16ecb00a9b23f75686d3cdcd098105dd71f4e4ce21ffe13c181be7af349adc61 \
-    --hash=sha256:31f672aadd67c499c13777c60cce25b75f1c1f3c8006fed3b2fdcbb474ae410d \
-    --hash=sha256:3af19c86bfd747dd5324eda948c4e93c9fd57a47bf89f0fa9f51a019529b7081 \
-    --hash=sha256:b60a3ea96299c776f65c02e3714c4a34a608fdd95831d3861ee3ab0797eff0b0 \
-    --hash=sha256:c2cc773c104456911cfd309315909b4c0a90918d4883b2e9f025729a504a3e6e \
-    --hash=sha256:c72aabbf544bceb3fa895376a188a90b7152efd47045b589fd358505ad8a85d4 \
-    --hash=sha256:fcf4442656e2947f3a7e7d3cc85c8030a92570c133df0c9a3ab576a8be8e55fd
+yarl==1.25.1 \
+    --hash=sha256:04fdf42ffc9539ec940645b4de97860a3b38e652e483b7ff73b631e7c81e4dbf \
+    --hash=sha256:1277ed8f43cac8b13c6edfbe57098157ce972dbe02be281f84bcc12421fa493b \
+    --hash=sha256:2830640542a2d19bc21c8d247ff42d4400afc0494ef7030fb021c247c1d0f595 \
+    --hash=sha256:7f836cc5101cd02c46e0e7c7ac042bb12d798fd62639e253f2f9778a47df921d
     # via aiohttp
 zstandard==0.25.0 \
     --hash=sha256:10b7b539e5c935d16b78f26d90203a4e4414631e3b4bd97da4923c75536ba006 \
